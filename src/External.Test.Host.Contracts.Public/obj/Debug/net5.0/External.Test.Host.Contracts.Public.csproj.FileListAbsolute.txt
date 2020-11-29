@@ -1,0 +1,11 @@
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\bin\Debug\net5.0\External.Test.Host.Contracts.Public.deps.json
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\bin\Debug\net5.0\External.Test.Host.Contracts.Public.dll
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\bin\Debug\net5.0\ref\External.Test.Host.Contracts.Public.dll
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\bin\Debug\net5.0\External.Test.Host.Contracts.Public.pdb
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\External.Test.Host.Contracts.Public.GeneratedMSBuildEditorConfig.editorconfig
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\External.Test.Host.Contracts.Public.AssemblyInfoInputs.cache
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\External.Test.Host.Contracts.Public.AssemblyInfo.cs
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\External.Test.Host.Contracts.Public.csproj.CoreCompileInputs.cache
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\External.Test.Host.Contracts.Public.dll
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\ref\External.Test.Host.Contracts.Public.dll
+C:\repos\external.test\src\External.Test.Host.Contracts.Public\obj\Debug\net5.0\External.Test.Host.Contracts.Public.pdb

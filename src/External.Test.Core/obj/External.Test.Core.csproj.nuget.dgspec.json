@@ -1,0 +1,308 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\repos\\external.test\\src\\External.Test.Core\\External.Test.Core.csproj": {}
+  },
+  "projects": {
+    "C:\\repos\\external.test\\src\\External.Test.Core.Contracts\\External.Test.Core.Contracts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\external.test\\src\\External.Test.Core.Contracts\\External.Test.Core.Contracts.csproj",
+        "projectName": "External.Test.Core.Contracts",
+        "projectPath": "C:\\repos\\external.test\\src\\External.Test.Core.Contracts\\External.Test.Core.Contracts.csproj",
+        "packagesPath": "C:\\Users\\marco.galea\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\external.test\\src\\External.Test.Core.Contracts\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\repos\\external.test\\NuGet.Config",
+          "C:\\Users\\marco.galea\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://igcproget.igc.zone/nuget/gig-core-nuget": {},
+          "https://igcproget.igc.zone/nuget/gig-core-v1-nuget": {},
+          "https://www.myget.org/F/gig/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Confluent.Kafka": {
+              "target": "Package",
+              "version": "[1.5.2, )"
+            },
+            "MediatR": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\repos\\external.test\\src\\External.Test.Core\\External.Test.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\external.test\\src\\External.Test.Core\\External.Test.Core.csproj",
+        "projectName": "External.Test.Core",
+        "projectPath": "C:\\repos\\external.test\\src\\External.Test.Core\\External.Test.Core.csproj",
+        "packagesPath": "C:\\Users\\marco.galea\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\external.test\\src\\External.Test.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\repos\\external.test\\NuGet.Config",
+          "C:\\Users\\marco.galea\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://igcproget.igc.zone/nuget/gig-core-nuget": {},
+          "https://igcproget.igc.zone/nuget/gig-core-v1-nuget": {},
+          "https://www.myget.org/F/gig/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "C:\\repos\\external.test\\src\\External.Test.Core.Contracts\\External.Test.Core.Contracts.csproj": {
+                "projectPath": "C:\\repos\\external.test\\src\\External.Test.Core.Contracts\\External.Test.Core.Contracts.csproj"
+              },
+              "C:\\repos\\external.test\\src\\External.Test.Data.Contracts\\External.Test.Data.Contracts.csproj": {
+                "projectPath": "C:\\repos\\external.test\\src\\External.Test.Data.Contracts\\External.Test.Data.Contracts.csproj"
+              },
+              "C:\\repos\\external.test\\src\\External.Test.Host.Contracts.Public\\External.Test.Host.Contracts.Public.csproj": {
+                "projectPath": "C:\\repos\\external.test\\src\\External.Test.Host.Contracts.Public\\External.Test.Host.Contracts.Public.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[10.1.1, )"
+            },
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.1.0, )"
+            },
+            "Microsoft.Extensions.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Polly.Contrib.WaitAndRetry": {
+              "target": "Package",
+              "version": "[1.1.1, )"
+            },
+            "Polly.Extensions.Http": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\repos\\external.test\\src\\External.Test.Data.Contracts\\External.Test.Data.Contracts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\external.test\\src\\External.Test.Data.Contracts\\External.Test.Data.Contracts.csproj",
+        "projectName": "External.Test.Data.Contracts",
+        "projectPath": "C:\\repos\\external.test\\src\\External.Test.Data.Contracts\\External.Test.Data.Contracts.csproj",
+        "packagesPath": "C:\\Users\\marco.galea\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\external.test\\src\\External.Test.Data.Contracts\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\repos\\external.test\\NuGet.Config",
+          "C:\\Users\\marco.galea\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://igcproget.igc.zone/nuget/gig-core-nuget": {},
+          "https://igcproget.igc.zone/nuget/gig-core-v1-nuget": {},
+          "https://www.myget.org/F/gig/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "MongoDB.Bson": {
+              "target": "Package",
+              "version": "[2.11.4, )"
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[2.11.4, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\repos\\external.test\\src\\External.Test.Host.Contracts.Public\\External.Test.Host.Contracts.Public.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\external.test\\src\\External.Test.Host.Contracts.Public\\External.Test.Host.Contracts.Public.csproj",
+        "projectName": "External.Test.Host.Contracts.Public",
+        "projectPath": "C:\\repos\\external.test\\src\\External.Test.Host.Contracts.Public\\External.Test.Host.Contracts.Public.csproj",
+        "packagesPath": "C:\\Users\\marco.galea\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\external.test\\src\\External.Test.Host.Contracts.Public\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\repos\\external.test\\NuGet.Config",
+          "C:\\Users\\marco.galea\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://igcproget.igc.zone/nuget/gig-core-nuget": {},
+          "https://igcproget.igc.zone/nuget/gig-core-v1-nuget": {},
+          "https://www.myget.org/F/gig/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
