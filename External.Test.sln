@@ -20,6 +20,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.Test.Data.Contract
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.Test.Data", "src\External.Test.Data\External.Test.Data.csproj", "{B55C5508-886F-42B4-A9A3-5E633F75B59D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "load", "load", "{A03B38F5-EA80-489A-831C-FC3162144284}"
+ProjectSection(SolutionItems) = preProject
+	tests\load\external.test.jmx = tests\load\external.test.jmx
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +38,7 @@ Global
 		{E9AAFC52-977C-4BD7-9CE5-BFFCF4B89CB3} = {0284C0B5-644A-4A43-92A5-D50A3C05D08D}
 		{754F73D7-79EE-492E-B3B0-1D7AF6CC1178} = {0CD771E6-A213-419A-AF33-E389B7BD6001}
 		{B55C5508-886F-42B4-A9A3-5E633F75B59D} = {0CD771E6-A213-419A-AF33-E389B7BD6001}
+		{A03B38F5-EA80-489A-831C-FC3162144284} = {C54D49BE-D95F-4573-8172-3A535099F4B6}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6B6A59A6-F8CB-4DB6-AC71-8D9DACBDA8D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
