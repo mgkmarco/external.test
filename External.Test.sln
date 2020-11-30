@@ -20,7 +20,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.Test.Data.Contract
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.Test.Data", "src\External.Test.Data\External.Test.Data.csproj", "{B55C5508-886F-42B4-A9A3-5E633F75B59D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "load", "load", "{A03B38F5-EA80-489A-831C-FC3162144284}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "load", "tests\load", "{A03B38F5-EA80-489A-831C-FC3162144284}"
 ProjectSection(SolutionItems) = preProject
 	tests\load\external.test.jmx = tests\load\external.test.jmx
 EndProjectSection

@@ -1,7 +1,6 @@
 using AutoMapper;
 using Confluent.Kafka;
 using External.Test.Consumers;
-using External.Test.Contracts;
 using External.Test.Contracts.Commands;
 using External.Test.Contracts.Services;
 using External.Test.Host.Extensions;

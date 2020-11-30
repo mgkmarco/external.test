@@ -91,6 +91,8 @@ namespace External.Test.Host.Extensions
                 var kafkaConsumer = new ConsumerBuilder<TKey, TValue>(consumerConfig)
                     .SetKeyDeserializer(new JsonDeserializer<TKey>())
                     .SetValueDeserializer(new JsonDeserializer<TValue>())
+                    .SetErrorHandler((x, e) => logger.LogError($"ErrorCode: {e.Code}, Reason: {e.Reason}"))
+                    .SetLogHandler((x, e) => logger.LogInformation($"LogLevel: {e.Level}, LogName: {e.Name}, LogMessage: {e.Message}"))
                     .Build();
 
                 return kafkaConsumer;
