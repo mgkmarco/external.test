@@ -7,6 +7,7 @@
         <e p="bin" t="ExcludeRecursive" />
         <e p="docker-compose.dcproj" t="IncludeRecursive" />
         <e p="docker-compose.yml" t="Include" />
+        <e p="nginx.conf" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
       </e>
       <e p="External.Test.sln" t="IncludeFlat" />

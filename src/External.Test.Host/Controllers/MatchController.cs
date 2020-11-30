@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using External.Test.Contracts;
 using External.Test.Contracts.Commands;
 using External.Test.Contracts.Services;
 using External.Test.Host.Contracts.Public.Models;

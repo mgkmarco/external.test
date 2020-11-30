@@ -15,7 +15,7 @@ ENV COMPlus_ReadyToRun=0
 WORKDIR /sln
 ONBUILD COPY ./*.sln  ./NuGet.Config ./
 ONBUILD ARG BUILD_VERSION
-# If BUILD_VERSION is set/non-empty, use it, otherwise use a default value
+
 ONBUILD ARG VERSION=${BUILD_VERSION:-1.0.0}
 COPY ["src/External.Test.Host/External.Test.Host.csproj", "src/External.Test.Host/"]
 RUN dotnet restore "src/External.Test.Host/External.Test.Host.csproj"

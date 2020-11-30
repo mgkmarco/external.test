@@ -1,4 +1,5 @@
 using AutoMapper;
+using Confluent.Kafka;
 using External.Test.Consumers;
 using External.Test.Contracts;
 using External.Test.Contracts.Commands;
@@ -8,6 +9,7 @@ using External.Test.Producers;
 using External.Test.Profiles;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,18 +42,21 @@ namespace External.Test.Host
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
-            services.AddKafkaProducer<int, UpdateMarketCommand>(_configuration.GetSection("Kafka:Producers"));
+            services.AddKafkaProducer<int, UpdateMarketCommand>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IProducerService<int, UpdateMarketCommand>, MarketUpdateCommandProducer>();
-            services.AddKafkaProducer<int, UpdateMarketSuccessEvent>(_configuration.GetSection("Kafka:Producers"));
+            services.AddKafkaProducer<int, UpdateMarketSuccessEvent>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IProducerService<int, UpdateMarketSuccessEvent>, MarketUpdateSuccessEventProducer>();
-            services.AddKafkaProducer<int, UpdateMarketFailedEvent>(_configuration.GetSection("Kafka:Producers"));
+            services.AddKafkaProducer<int, UpdateMarketFailedEvent>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IProducerService<int, UpdateMarketFailedEvent>, MarketUpdateFailedEventProducer>();
-            services.AddKafkaConsumer<int, UpdateMarketCommand>(_configuration.GetSection("Kafka:Consumers"));
+            services.AddKafkaConsumer<int, UpdateMarketCommand>(_configuration.GetSection("Kafka"));
             services.AddHostedService<MarketUpdateCommandConsumer>();
             services.AddMediatrPipeline();
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
             services.AddMongoClient(_configuration.GetSection("Database"));
             services.AddRepositories(_configuration.GetSection("Database:Repositories"));
+            services.AddHealthChecks()
+                .AddMongoDb(_configuration["Database:ConnectionString"])
+                .AddKafka(new ProducerConfig() {BootstrapServers = _configuration["Kafka:ConnectionString"]});
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -59,11 +64,17 @@ namespace External.Test.Host
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "External.Test.Core.WebApi v1"));
             }
-
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "External.Test.Core.WebApi v1"));
             app.UseHttpsRedirection();
+            app
+                .UseHealthChecks("/health", new HealthCheckOptions
+                {
+                    Predicate = _ => true
+                });
+                
             app.UseRouting();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

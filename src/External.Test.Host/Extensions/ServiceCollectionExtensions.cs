@@ -1,14 +1,11 @@
 ﻿using Confluent.Kafka;
 using Confluent.Kafka.Admin;
-using External.Test.Contracts.Commands;
 using External.Test.Contracts.Options;
-using External.Test.Contracts.Services;
 using External.Test.Data.Contracts.Entities;
 using External.Test.Data.Contracts.Repositories;
 using External.Test.Data.Repositories;
 using External.Test.Factories;
 using External.Test.Handlers;
-using External.Test.Producers;
 using External.Test.Serializers;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -30,8 +27,11 @@ namespace External.Test.Host.Extensions
         
         public static void AddKafkaProducer<TKey, TValue>(this IServiceCollection services, IConfigurationSection configurationSection)
         {
+            var connectionString = configurationSection.GetValue<string>("ConnectionString");
+            var producerConfigurationSection = configurationSection.GetSection("Producers");
+            
             var producerOptions = new List<ProducerOptions>();
-            configurationSection.Bind(producerOptions);
+            producerConfigurationSection.Bind(producerOptions);
 
             var producer = producerOptions.FirstOrDefault(x =>
                 string.Equals(x.MessageType, typeof(TValue).Name, StringComparison.InvariantCultureIgnoreCase));
@@ -41,7 +41,7 @@ namespace External.Test.Host.Extensions
                 throw new ArgumentNullException($"No producer configuration for the message type found");
             }
             
-            var producerConfig = new ProducerConfig(producer.Configurations);
+            var producerConfig = new ProducerConfig(producer.Configurations){ BootstrapServers = connectionString };
             
             if (producer.EnableTopicCreation)
             {
@@ -69,8 +69,11 @@ namespace External.Test.Host.Extensions
 
         public static void AddKafkaConsumer<TKey, TValue>(this IServiceCollection services, IConfigurationSection configurationSection)
         {
+            var connectionString = configurationSection.GetValue<string>("ConnectionString");
+            var consumerConfigurationSection = configurationSection.GetSection("Consumers");
+            
             var consumerOptions = new List<ConsumerOptions>();
-            configurationSection.Bind(consumerOptions);
+            consumerConfigurationSection.Bind(consumerOptions);
             
             var consumer = consumerOptions.FirstOrDefault(x =>
                 string.Equals(x.MessageType, typeof(TValue).Name, StringComparison.InvariantCultureIgnoreCase));
@@ -80,7 +83,7 @@ namespace External.Test.Host.Extensions
                 throw new ArgumentNullException($"No consumer configuration for the message type found");
             }
             
-            var consumerConfig = new ConsumerConfig(consumer.Configurations);
+            var consumerConfig = new ConsumerConfig(consumer.Configurations) { BootstrapServers = connectionString };
             
             services.AddSingleton(provider =>
             {

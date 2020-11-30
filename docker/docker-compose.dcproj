@@ -15,5 +15,6 @@
     <Content Include=".dockerignore">
       <Link>external.test\docker\.dockerignore</Link>
     </Content>
+    <Content Include="nginx.conf" />
   </ItemGroup>
 </Project>
