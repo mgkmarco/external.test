@@ -23,19 +23,19 @@ namespace External.Test.Producers
 
         public async Task ProduceAsync(int key, UpdateMarketCommand message)
         {
-            message.CorrelationId = Guid.NewGuid();
-            var kafkaMessage = new Message<int, UpdateMarketCommand>()
-            {
-                Headers = new Headers{ new Header("CorrelationId", message.CorrelationId.ToByteArray()) },
-                Key = key,
-                Timestamp = new Timestamp(DateTimeOffset.UtcNow),
-                Value = message
-            };
-
             try
             {
-                var deliveryReport = await _producer.ProduceAsync(_topic, kafkaMessage);
-                _logger.LogInformation($"Partition: {deliveryReport.Partition}, TopicPartition: {deliveryReport.TopicPartition}");
+                message.CorrelationId = Guid.NewGuid();
+                var kafkaMessage = new Message<int, UpdateMarketCommand>()
+                {
+                    Headers = new Headers{ new Header("CorrelationId", message.CorrelationId.ToByteArray()) },
+                    Key = key,
+                    Timestamp = new Timestamp(DateTimeOffset.UtcNow),
+                    Value = message
+                };
+                
+                    var deliveryReport = await _producer.ProduceAsync(_topic, kafkaMessage);
+                    _logger.LogInformation($"Partition: {deliveryReport?.Partition}, TopicPartition: {deliveryReport?.TopicPartition}");
             }
             catch (Exception e)
             {

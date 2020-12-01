@@ -37,13 +37,8 @@ namespace External.Test.Host.Controllers
             
             var request = _mapper.Map<UpdateMarketCommand>(marketUpdateRequest);
             request.MatchId = matchId;
-            var random = new Random();
-            
-            for (int x = 0; x < 1; x++)
-            {
-                await _producerService.ProduceAsync(random.Next(0, 10), request);   
-            }
-            
+            await _producerService.ProduceAsync(request.MarketId, request);
+
             return Accepted();
         }
     }

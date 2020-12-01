@@ -14,7 +14,8 @@ namespace External.Test.Producers
         private const string _topic = nameof(UpdateMarketFailedEvent);
         private bool _isDisposing;
 
-        public MarketUpdateFailedEventProducer(IProducer<int, UpdateMarketFailedEvent> producer, ILogger<MarketUpdateFailedEventProducer> logger)
+        public MarketUpdateFailedEventProducer(IProducer<int, UpdateMarketFailedEvent> producer,
+            ILogger<MarketUpdateFailedEventProducer> logger)
         {
             _producer = producer ?? throw new ArgumentNullException(nameof(producer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -22,19 +23,19 @@ namespace External.Test.Producers
 
         public async Task ProduceAsync(int key, UpdateMarketFailedEvent message)
         {
-            var kafkaMessage = new Message<int, UpdateMarketFailedEvent>()
-            {
-                Headers = new Headers {new Header("CorrelationId", message.CorrelationId.ToByteArray())},
-                Key = key,
-                Timestamp = new Timestamp(DateTimeOffset.UtcNow),
-                Value = message
-            };
-
             try
             {
+                var kafkaMessage = new Message<int, UpdateMarketFailedEvent>()
+                {
+                    Headers = new Headers {new Header("CorrelationId", message.CorrelationId.ToByteArray())},
+                    Key = key,
+                    Timestamp = new Timestamp(DateTimeOffset.UtcNow),
+                    Value = message
+                };
+
                 var deliveryReport = await _producer.ProduceAsync(_topic, kafkaMessage);
                 _logger.LogInformation(
-                    $"Partition: {deliveryReport.Partition}, TopicPartition: {deliveryReport.TopicPartition}");
+                    $"Partition: {deliveryReport?.Partition}, TopicPartition: {deliveryReport?.TopicPartition}");
             }
             catch (Exception e)
             {

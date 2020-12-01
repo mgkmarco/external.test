@@ -2,6 +2,7 @@ using AutoMapper;
 using Confluent.Kafka;
 using External.Test.Consumers;
 using External.Test.Contracts.Commands;
+using External.Test.Contracts.Constants;
 using External.Test.Contracts.Services;
 using External.Test.Host.Extensions;
 using External.Test.Producers;
@@ -41,21 +42,22 @@ namespace External.Test.Host
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
-            services.AddKafkaProducer<int, UpdateMarketCommand>(_configuration.GetSection("Kafka"));
+            services.AddKafkaProducer<int, UpdateMarketCommand>(_configuration.GetSection(Section.Kafka));
+            services.AddKafkaProducer<int, UpdateMarketSuccessEvent>(_configuration.GetSection(Section.Kafka));
+            services.AddKafkaProducer<int, UpdateMarketFailedEvent>(_configuration.GetSection(Section.Kafka));
+            services.AddKafkaConsumer<int, UpdateMarketCommand>(_configuration.GetSection(Section.Kafka));
             services.AddSingleton<IProducerService<int, UpdateMarketCommand>, MarketUpdateCommandProducer>();
-            services.AddKafkaProducer<int, UpdateMarketSuccessEvent>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IProducerService<int, UpdateMarketSuccessEvent>, MarketUpdateSuccessEventProducer>();
-            services.AddKafkaProducer<int, UpdateMarketFailedEvent>(_configuration.GetSection("Kafka"));
             services.AddSingleton<IProducerService<int, UpdateMarketFailedEvent>, MarketUpdateFailedEventProducer>();
-            services.AddKafkaConsumer<int, UpdateMarketCommand>(_configuration.GetSection("Kafka"));
             services.AddHostedService<MarketUpdateCommandConsumer>();
             services.AddMediatrPipeline();
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
-            services.AddMongoClient(_configuration.GetSection("Database"));
-            services.AddRepositories(_configuration.GetSection("Database:Repositories"));
+            services.AddMongoClient(_configuration.GetSection(Section.Database));
+            services.AddRepositories(_configuration.GetSection(Section.DatabaseRepositories));
             services.AddHealthChecks()
-                .AddMongoDb(_configuration["Database:ConnectionString"])
-                .AddKafka(new ProducerConfig() {BootstrapServers = _configuration["Kafka:ConnectionString"]});
+                .AddMongoDb(_configuration[Section.DatabaseConnectionString])
+                .AddKafka(new ProducerConfig() {BootstrapServers = _configuration[Section.KafkaConnectionString]});
+            services.AddRetryPolicy(_configuration.GetSection(Section.RetryPolicy));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

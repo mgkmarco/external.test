@@ -69,32 +69,11 @@ namespace External.Test.Host.Extensions
 
         public static void AddKafkaConsumer<TKey, TValue>(this IServiceCollection services, IConfigurationSection configurationSection)
         {
-            var connectionString = configurationSection.GetValue<string>("ConnectionString");
-            var consumerConfigurationSection = configurationSection.GetSection("Consumers");
-            
-            var consumerOptions = new List<ConsumerOptions>();
-            consumerConfigurationSection.Bind(consumerOptions);
-            
-            var consumer = consumerOptions.FirstOrDefault(x =>
-                string.Equals(x.MessageType, typeof(TValue).Name, StringComparison.InvariantCultureIgnoreCase));
-
-            if (consumer == null)
-            {
-                throw new ArgumentNullException($"No consumer configuration for the message type found");
-            }
-            
-            var consumerConfig = new ConsumerConfig(consumer.Configurations) { BootstrapServers = connectionString };
-            
             services.AddSingleton(provider =>
             {
                 var logger = provider.GetRequiredService<ILogger<IConsumer<TKey, TValue>>>();
-                var kafkaConsumer = new ConsumerBuilder<TKey, TValue>(consumerConfig)
-                    .SetKeyDeserializer(new JsonDeserializer<TKey>())
-                    .SetValueDeserializer(new JsonDeserializer<TValue>())
-                    .SetErrorHandler((x, e) => logger.LogError($"ErrorCode: {e.Code}, Reason: {e.Reason}"))
-                    .SetLogHandler((x, e) => logger.LogInformation($"LogLevel: {e.Level}, LogName: {e.Name}, LogMessage: {e.Message}"))
-                    .Build();
-
+                var kafkaConsumer = new KafkaConsumerFactory()
+                    .CreateKafkaConsumer(configurationSection, logger);
                 return kafkaConsumer;
             });
         }
@@ -124,6 +103,13 @@ namespace External.Test.Host.Extensions
 
             services.Configure<List<RepositoryOptions>>(configurationSection);
             services.AddSingleton<IRepository<MarketUpdateEntity>, MarketUpdateRepository>();
+        }
+        
+        public static void AddRetryPolicy(this IServiceCollection services, IConfigurationSection configurationSection)
+        {
+            var retryPolicyOptions = new RetryPolicyOptions();
+            configurationSection?.Bind(retryPolicyOptions);
+            services.AddSingleton<IRetryPolicyOptions>(retryPolicyOptions);
         }
     }
 }

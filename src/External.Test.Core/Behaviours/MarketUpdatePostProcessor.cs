@@ -2,7 +2,6 @@
 using External.Test.Contracts.Commands;
 using External.Test.Contracts.Services;
 using MediatR.Pipeline;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,14 +12,12 @@ namespace External.Test.Behaviours
     {
         private readonly IProducerService<int, UpdateMarketSuccessEvent> _producerService;
         private readonly IMapper _mapper;
-        private readonly ILogger<MarketUpdatePostProcessor> _logger;
 
         public MarketUpdatePostProcessor(IProducerService<int, UpdateMarketSuccessEvent> producerService,
-            IMapper mapper, ILogger<MarketUpdatePostProcessor> logger)
+            IMapper mapper)
         {
             _producerService = producerService ?? throw new ArgumentNullException(nameof(producerService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Process(UpdateMarketCommand request, UpdateMarketResponse response,

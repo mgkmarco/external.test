@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Confluent.Kafka;
 using External.Test.Contracts.Commands;
+using External.Test.Contracts.Options;
 using External.Test.Contracts.Services;
+using External.Test.Factories;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Polly;
-using Polly.Contrib.WaitAndRetry;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,9 @@ namespace External.Test.Consumers
         private readonly IAsyncPolicy _retryPolicy;
 
         public MarketUpdateCommandConsumer(IConsumer<int, UpdateMarketCommand> consumer,
-            IProducerService<int, UpdateMarketFailedEvent> producer, IMediator mediator, IMapper mapper,
+            IProducerService<int, UpdateMarketFailedEvent> producer, 
+            IRetryPolicyOptions retryPolicyOptions, 
+            IMediator mediator, IMapper mapper,
             ILogger<MarketUpdateCommandConsumer> logger)
         {
             _consumer = consumer ?? throw new ArgumentNullException(nameof(consumer));
@@ -31,17 +34,14 @@ namespace External.Test.Consumers
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1),
-                retryCount: 5);
-            _retryPolicy = Policy
-                .Handle<Exception>()
-                .WaitAndRetryAsync(delay,
-                    (exception, span, retryCount, context) =>
-                    {
-                        _logger.LogError(exception,
-                            $"Failed. Retry count: {retryCount}, exception message: {exception.Message}");
-                    });
+            
+            if (retryPolicyOptions == null)
+            {
+                throw new ArgumentNullException(nameof(retryPolicyOptions));
+            }
+            
+            _retryPolicy = new PolicyFactory()
+                .CreateWaitAndRetryWithDecorrelatedJitterBackoff(retryPolicyOptions.MedianFirstRetryDelayInSeconds, retryPolicyOptions.RetryCount, logger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -75,8 +75,8 @@ namespace External.Test.Consumers
                                            $"Partition: {message.Partition.Value}, " +
                                            $"Offset: {message.TopicPartitionOffset.Offset.Value}");
 
-                    await _retryPolicy.ExecuteAsync(async x => await _mediator.Send(message.Message.Value, token),
-                        token);
+                     await _retryPolicy.ExecuteAsync(async x => await _mediator.Send(message.Message.Value, token),
+                         token);
                 }
                 catch (Exception e)
                 {
