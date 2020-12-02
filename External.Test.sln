@@ -32,6 +32,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{72B11E82-896F-4301-840C-CC2A5AC9359F}"
 ProjectSection(SolutionItems) = preProject
 	readme.md = readme.md
+	highlevel.png = highlevel.png
+	ordering.png = ordering.png
 EndProjectSection
 EndProject
 Global
