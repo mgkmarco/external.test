@@ -16,6 +16,11 @@
 9. [ Hosted Service Consumer Sequence  ](#hosted-service)
 10. [ Datastore Document Entity Structure  ](#datastore)
 11. [ Containerization and running the app  ](#container)
+12. [ Load Tests  ](#load)
+13. [ 3rd Party Library Dependencies  ](#libs)
+14. [ Assumptions  ](#assumptions)
+15. [ Future Improvements  ](#future)
+16. [ Further Reading & References ](#refs)
 
 <a name="desc"></a>
 ## 1. Description
@@ -120,7 +125,7 @@ On startup the following registrations and/or setting configurations are applied
 - Registration of RetryPolicy configurations
 
 ### Database Configuration via appsettings.json
-```json
+```javascript
   "Database": {
     "ConnectionString": "mongodb://localhost:27017",
     "Repositories": [
@@ -138,7 +143,7 @@ Important to note that for the `IRepository<MarketUpdateEntity>` implementation,
 - Repository details (collection and database name) can be changed (via the config) on the fly leveraging the options monitor `OnChange` delegate
 
 ### Kafka Configuration via appsettings.json
-```json
+```javascript
   "Kafka": {
     "ConnectionString": "localhost:9092",
     "Producers": [
@@ -169,7 +174,7 @@ In the Configurations sections (both Consumers and/or Producers) the following s
 [Kafka Configurations](https://kafka.apache.org/documentation/#configuration)
 
 ### Retry Policy Configuration via appsettings.json
-```json
+```javascript
   "RetryPolicy": {
     "MedianFirstRetryDelayInSeconds": 3,
     "RetryCount": 3
@@ -188,7 +193,7 @@ For more information on the retry policy of choice, check out the official docum
 - A request with a POST verb is issued from external sources
 - MatchId (int) from route. Payload body example as follows:
 
-```json
+```javascript
 {
     "marketId": 12,
     "marketType": "Over & Under",
@@ -243,7 +248,7 @@ No resilience is implemented at a producer level, such as retry policies etc… 
 - Default collection name:: Updates
 
 The following is an example of structure of the document entity that is persisted in the DB. 
-```json
+```javascript
 {
     _id: '7dc4e6b8-aff6-4551-8d0a-5fbf033f2795', --Stringified CorrelationId
     CreatedAt: ISODate('2020-12-02T15:04:23.958Z'),
@@ -294,3 +299,82 @@ The following command will pull/build/run the following containers:
 - [ExternalHost via NGINX](http://localhost:4000/swagger/index.html) 
 - [Kafka Control Centre](http://localhost:9021/clusters)
 - [MongoDB Express](http://localhost:8081/)
+
+<a name="load"></a>
+## Load Tests
+Load  testing was performed using the [**Apache JMeter**](https://jmeter.apache.org/). The set-up for the load tests was as follows: 
+- The whole stack was running on my machine’s docker server instance:
+    - Kernel Version: 4.19.104-microsoft-standard
+    - Operating System: Docker Desktop
+    - OSType: linux
+    -Architecture: x86_64
+    - CPUs: 8
+    - Total Memory: 12.37GiB
+- My machine’s specs:
+    - Processor: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz 2.00GHz
+    - RAM: 16 GB
+    - OS: Windows 10
+    - Architecture: 64-bit OS, x64 based processor
+- ExternalHost, which is our application that we want to load, was scaled to 5 instances with NGINX acting as a load balancer proxying requests (LB and proxying defined in nginx.conf)
+- Number of threads was saturated at 75. Meaning 75 concurrent users calling the web API endpoint. Increasing the value would result in degradation 
+- Each user will call the endpoint for 100 times. therefore 7.5K calls in total per test run
+
+In order to set up our environment, the following command was issued, in order to scale the application to 5 instances:
+```bash
+    docker-compose up -d --scale externalhost=5
+```
+
+The following results were achieved. It is important to note that whilst running the tests, my machine was strained to the limit, with CPU and MEM consumption 100%. This means that if the tests would have been replayed on a better stacked machine, the results would be considerably better. 
+![JMeter](jmeter.png)
+
+**Label**  | **Value**
+------------- | -------------
+Minimum  | 19ms
+Std. Deviation  | 51.65
+Average  | 119ms
+Throughput  | 244requests/sec
+Maximum  | 436ms
+
+The full load test profile can be found here /tests/load/external.test.jmx
+
+<a name="libs"></a>
+## 3rd Party Library Dependencies
+- [AutoMapper](https://github.com/AutoMapper/AutoMapper)
+- [MediatR](https://github.com/jbogard/MediatR)
+- [FluentValidation](https://github.com/FluentValidation/FluentValidation)
+- [confluent-kafka-dotnet](https://github.com/confluentinc/confluent-kafka-dotnet)
+- [mongo-csharp-driver](https://github.com/mongodb/mongo-csharp-driver)
+- [Polly](https://github.com/mongodb/mongo-csharp-driver)
+- [Polly.Contrib.WaitAndRetry](https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry)
+- [Bogus](https://github.com/bchavez/Bogus)
+- [xunit](https://github.com/xunit/xunit)
+- [moq](https://github.com/moq/moq)
+
+<a name="assumptions"></a>
+## Assumptions
+The biggest assumption in the undertaking of this project is that the persisting of the events in the datastore are for auditing/debugging/historical purposes and not for real-time processing and/or querying. 
+
+If that had been the case, more effort would have been invested in that aspect, such as datastore optimizations, etc… 
+
+Another assumption that I’ve taken was that the “Market ID” property is a unique identifier for the “Market Type”. In relational terms, my assumption was that the MarketId is essentially the primary key for a hypothetical Markets table, therefore a table can be normalized using it as a key. 
+
+<a name="future"></a>
+## Future Improvements
+- Distributed Tracing
+- Integration Testing
+- Increased code coverage from tests 
+- Implement Circuit Breaker policy on the producer side (REST API), so as to trip the circuit for some predefined time if the broker is down
+- Fine tuning of database settings (indexes, shards, replicas. etc…)
+- Fine tuning of Kafka producer and/or consumer settings such as partitioning etc…
+- API Authentication 
+- Overall security (Kafka, MongoDB, etc…)
+- Benchmarking
+- Overall refactoring to abstract common code in core libraries etc… 
+
+<a name="refs"></a>
+## Further Reading & References
+- [Kafka](https://kafka.apache.org/documentation/)
+- [Kafka dotnet](https://github.com/confluentinc/confluent-kafka-dotnet/wiki)
+- [Docker](https://docs.docker.com/reference/)
+- [MongoDB](https://docs.mongodb.com/manual/reference/operator/)
+- [MongoDB csharp](https://docs.mongodb.com/drivers/csharp)

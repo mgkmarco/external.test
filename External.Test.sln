@@ -36,6 +36,7 @@ ProjectSection(SolutionItems) = preProject
 	ordering.png = ordering.png
 	webapi.png = webapi.png
 	hosted.png = hosted.png
+	jmeter.png = jmeter.png
 EndProjectSection
 EndProject
 Global
