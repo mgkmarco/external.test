@@ -12,14 +12,14 @@ namespace External.Test.Profiles
         public MappingProfile()
         {
             CreateMap<MarketSelectionUpdateRequest, UpdateMarketSelectionCommand>()
-                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Math.Round(src.Price, 2)))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Math.Round(src.Price, 2, MidpointRounding.AwayFromZero)))
                 .ReverseMap();
             
             CreateMap<MarketUpdateRequest, UpdateMarketCommand>()
                 .ReverseMap();    
 
             CreateMap<UpdateMarketSelectionCommand, MarketUpdateSelection>()
-                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Math.Round(src.Price, 2)))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Math.Round(src.Price, 2, MidpointRounding.AwayFromZero)))
                 .ReverseMap();
             
             CreateMap<UpdateMarketCommand, MarketUpdate>()

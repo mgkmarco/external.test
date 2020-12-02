@@ -14,6 +14,6 @@
         /// Price
         /// <example>1.65</example>
         /// </summary>
-        public float Price { get; set; }
+        public double Price { get; set; }
     }
 }

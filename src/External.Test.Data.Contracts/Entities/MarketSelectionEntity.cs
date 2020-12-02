@@ -6,7 +6,7 @@ namespace External.Test.Data.Contracts.Entities
     public class MarketSelectionEntity
     {
         public string Name { get; set; }
-        [BsonRepresentation(BsonType.Decimal128)]
+        [BsonRepresentation(BsonType.Double)]
         public double Price { get; set; }
     }
 }
