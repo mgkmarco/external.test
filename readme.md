@@ -236,7 +236,7 @@ No resilience is implemented at a producer level, such as retry policies etc… 
     - Instantiating an _UpdateMarketResponse_ and setting the Success flag to true
 - **In The above step it is important to note that:**
     - Any exceptions will be thrown to the caller, and hence handled by the policy wrap
-    - `ReplaceOneAsync` is idempotent and it is implemented in a way to perform **UPSERT**. This is done in order to remove any possibility of deduplication 
+    - `ReplaceOneAsync` is idempotent and it is implemented in a way to perform **UPSERT**. This is done in order to remove any possibility of duplicates 
     - The “CorrelationId” is used as the database collection Id column
 - Within the mediator pipeline, a “_PostProcessor_“ (`MarketUpdatePostProcessor`) will handle any `UpdateMarketResponse` which have the Success flag set to true. As per requirements, the post-processor is responsible for calling the `MarketUpdateSuccessEventProducer` ProduceAsync method to produce messages of type `UpdateMarketSuccessEvent` to a partition on Kafka of the same name(using MarketId as partition key) 
 - Process is repeated for the same MarketId key within the partition (to be precise a consumer might read from other partitions as well, however a partition will never be shared with any other consumer/s)
