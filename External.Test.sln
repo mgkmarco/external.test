@@ -34,6 +34,8 @@ ProjectSection(SolutionItems) = preProject
 	readme.md = readme.md
 	highlevel.png = highlevel.png
 	ordering.png = ordering.png
+	webapi.png = webapi.png
+	hosted.png = hosted.png
 EndProjectSection
 EndProject
 Global

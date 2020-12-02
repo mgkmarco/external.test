@@ -6,16 +6,19 @@
 4. [ Tech Stack ](#tech-stack)
 5. [ High Level Architecture Design ](#high-level-arch)
 6. [ Achieving Requirements ](#achieve-req)
-    6.1 [ Able to process the updates received as fast as possible; to not pileup ](#first-req)
-    6.2 [ Processing updates for the same entity identifier in order ](#second-req)
-    6.3 [ Minimizing the chance of losing an update and not processing it ](#third-req)
-    6.4 [ System is to be highly available, ideally having no Single-Point-Of-Failure and able to recover fromfaults should one specific service instance crash ](#fourth-req)
-    6.5 [ Scaling (vertically/horizontally) with minimal effort (ideally no code changes) ](#fifth-req)
-    
+    - [ Able to process the updates received as fast as possible; to not pileup ](#first-req)
+    - [ Processing updates for the same entity identifier in order ](#second-req)
+    - [ Minimizing the chance of losing an update and not processing it ](#third-req)
+    - [ System is to be highly available, ideally having no Single-Point-Of-Failure and able to recover fromfaults should one specific service instance crash ](#fourth-req)
+    - [ Scaling (vertically/horizontally) with minimal effort (ideally no code changes) ](#fifth-req)
+7. [ Application Startup & Configurations  ](#app-startup)   
+8. [ Web REST API Sequence  ](#web-api)
+9. [ Hosted Service Consumer Sequence  ](#hosted-service)
+10. [ Datastore Document Entity Structure  ](#datastore)
+11. [ Containerization and running the app  ](#container)
 
 <a name="desc"></a>
 ## 1. Description
-
 
 <a name="probdef"></a>
 ## Problem Definition
@@ -26,7 +29,7 @@ The processing per update involves deserialization, saving data to a data store 
 The API will be receiving multiple updates for the same entity identifiers thus it is important that updates for the same entity identifier are processed in order, failure to do so will result on the wrong odds showing on the site.
 
 Example Market Update Structure:
-- Market ID (Entity Identifier) – 123
+- Market ID (**Entity Identifier**) – 123
 - Market Type – “Match Result”
 - Market State - Open
 - Market Selections:
@@ -81,7 +84,7 @@ As explained in the motivation for choosing Kafka as the message broker; Order i
 - All consumers form part of the same consumer group. Therefore no competing consumers per group, and thus each consumer will consume messages in-order from the respective partition
 - Idempotency. From both kafka and mongo/datastore perspective
 
-The image below is a screenshot from the Control Centre which shows that a key (the partition key which under the hood we specify it to be the MarketId), is always mapped to the same partition. Therefore, since each partition will be consumed solely by a single consumer in a consuming group, order is guaranteed.
+The image below is a screenshot from the Control Centre which shows that a **key** (the partition key which under the hood we specify it to be the MarketId), is always mapped to the same partition. Therefore, since each partition will be consumed **solely** by a single consumer in a consuming group, order is guaranteed.
 ![Ordering](ordering.png)
 
 <a name="third-req"></a>
@@ -97,8 +100,197 @@ The image below is a screenshot from the Control Centre which shows that a key (
 
 <a name="fifth-req"></a>
 ### Scaling (vertically/horizontally) with minimal effort (ideally no code changes)
-- Containerization. As shown in the “Load Tests” sections below, I was able to scale my application by having a LB in front as an ingress (I chose NGINX for simplicity, could be anything) running the following command on docker-compose: 
+- Containerization. As shown in the “**Load Tests**” sections below, I was able to scale my application by having a LB in front as an ingress (I chose NGINX for simplicity, could be anything) running the following command on docker-compose: 
 
 ```bash
     docker-compose up -d --scale externalhost=5
 ```
+
+<a name="app-startup"></a>
+## Application Startup & Configurations
+On startup the following registrations and/or setting configurations are applied:
+- Any fluent validations are registered using an assembly marker (in this case, Startup.cs assembly)
+- Kafka producer registrations (both IKafka implementations, but also our own IProducerService that wrap the Kafka dependencies)
+- Kafka consumers (`IConsumer`)
+- Hosted services (`BackgroundService` which is essentially where the consumer will be running)
+- RegisteringMediatr pipeline (Handlers, Post-Processors, etc…)
+- AutoMapper registration, using an assembly marker for the profiles 
+- Registration of the MongoDB client, and of the data repositories (`IMongoClient` and `IRepository<MarketUpdateEntity>`
+- Adding/Registration of health checks (Exposed health checks for both Kafka and MongoDB). Health checks are exposed on /health
+- Registration of RetryPolicy configurations
+
+### Database Configuration via appsettings.json
+```json
+  "Database": {
+    "ConnectionString": "mongodb://localhost:27017",
+    "Repositories": [
+      {
+        "Name": "MarketUpdateRepository",
+        "Database": "Markets",
+        "Collection": "Updates"
+      }
+    ]
+  }
+```
+
+Important to note that for the `IRepository<MarketUpdateEntity>` implementation, an `IOptionsMonitor<List<RepositoryOptions>>`  is injected. The reason for this design choice is as follows:
+- The implementation can be extended to have multiple repositories (for example repo/collection combination for Update, and another for Insert)
+- Repository details (collection and database name) can be changed (via the config) on the fly leveraging the options monitor `OnChange` delegate
+
+### Kafka Configuration via appsettings.json
+```json
+  "Kafka": {
+    "ConnectionString": "localhost:9092",
+    "Producers": [
+      {
+        "MessageType": "UpdateMarketCommand",
+        "EnableTopicCreation": true,
+        "NumPartitions": 24,
+        "Configurations": {
+          "partitioner": "murmur2",
+          "acks": "all",
+          "enable.idempotence": "true"
+        }
+      }
+    ],
+    "Consumers": [
+      {
+        "MessageType": "UpdateMarketCommand",
+        "Configurations": {
+          "group.id": "market-update-group",
+          "auto.offset.reset": "earliest"
+        }
+      }
+    ]
+  }
+```
+Same as for the database, multiple consumers and producers can be configured with each having their own set of settings. An important property to note is the EnableTopicCreation. On application startup, the implementation has bee executed in a way that if this setting is set to true, the application will under the hood attempt to create the topic, with the given settings for you. Thus this means that devops intervention is kept to the minimum.
+In the Configurations sections (both Consumers and/or Producers) the following settings can be applied:
+[Kafka Configurations](https://kafka.apache.org/documentation/#configuration)
+
+### Retry Policy Configuration via appsettings.json
+```json
+  "RetryPolicy": {
+    "MedianFirstRetryDelayInSeconds": 3,
+    "RetryCount": 3
+  }
+```
+
+The above section is optional, and if nothing is explicitly provided, the default values will be applied, i.e.
+- `MedianFirstRetryDelayInSeconds` = 5
+- `RetryCount` = 5
+
+For more information on the retry policy of choice, check out the official documentation over here; 
+[Polly Contrib](https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry#new-jitter-recommendation)
+
+<a name="web-api"></a>
+## Web REST API Sequence
+- A request with a POST verb is issued from external sources
+- MatchId (int) from route. Payload body example as follows:
+
+```json
+{
+    "marketId": 12,
+    "marketType": "Over & Under",
+    "marketState": "Closed",
+    "selections": [
+        {
+            "name": "Over",
+            "price": 12.89
+        },
+        {
+            "name": "Under",
+            "price": 1.12
+        }
+    ]
+}
+```
+
+- Validation middleware (_FluentValidation_) executes and validates the payload request DTO
+    - _400 Bad Request_ HTTP response is returned if validation is not successful 
+- `UpdateMarketAsync` within the `MatchController` maps the request DTO (_AutoMapper_), and issues a call to `MarketUpdateCommandProducer : IProducerService<int, UpdateMarketCommand>` (Core layer)
+- The producer service is essentially a wrap for the _Kafka_ `IProducer<TKey, TMessage>` implementation which will call `ProduceAsync` and await for a delivery report. Before the ProduceAsync call is issued, the message command is decorated with a “CorrelationId”, to be used to correlate messages in the db and subsequent events 
+- Messages are published to **UpdateMarketCommand** topic using **MarketId** as the partition key for ordering purposes 
+- _202 Accepted_ HTTP response is returned which is the suggested response in eventual consistent paradigms
+
+### Miscellaneous
+No resilience is implemented at a producer level, such as retry policies etc… This is done by design. The reason being is that whilst a retry policy is being executed (imagine a transient network fault), the next message in the sequence for that MatchId:MarketId combination might have been received by the system and produced successfully, resulting in out of order sequences. Essentially omitted to mitigate possible race-conditions while executing any resilience policies. 
+![Web Api Sequence](webapi.png)
+
+<a name="hosted-service"></a>
+## Hosted Service Consumer Sequence
+- The consumer is essentially a `BackgroundService:IHostedService`. On start-up it subscribes to a Kafka topic with the name of `UpdateMarketCommand`
+- Important to note that since the consumer/s are part of a “_Consumer Group_” (**market-update-group** by default config), it is guaranteed that no two consumers will be consuming from the same partition (no competing consumers), thus guaranteeing order per _MarketId_
+- A _Wait-and-Retry_ policy with jittered back-off wraps the whole flow up until a success event is produced, or till all the retries (5 by default) have been exhausted
+    - In case of retry exhaustion, a failed event message, of type _UpdateMarketFailedEvent_ will be produced to a topic of the same name as the event
+- A mediator pattern (using 3rd party library _MediatR_) is used to abstract implementation details from the consumer. The consumer will only have to invoke `await _mediator.Send(message.Message.Value, token)`
+- An update handler (`MarketUpdateHandler:IRequestHandler<UpdateMarketCommand, UpdateMarketResponse>`) processes the request by:
+    - Mapping the request command to the database entity _MarketUpdateEntity_
+    - Getting the database collection context for the entity type
+    - Calling _ReplaceOneAsync_ on the _IMongoCollection<MarketUpdateEntity>_ 
+    - Instantiating an _UpdateMarketResponse_ and setting the Success flag to true
+- **In The above step it is important to note that:**
+    - Any exceptions will be thrown to the caller, and hence handled by the policy wrap
+    - `ReplaceOneAsync` is idempotent and it is implemented in a way to perform **UPSERT**. This is done in order to remove any possibility of deduplication 
+    - The “CorrelationId” is used as the database collection Id column
+- Within the mediator pipeline, a “_PostProcessor_“ (`MarketUpdatePostProcessor`) will handle any `UpdateMarketResponse` which have the Success flag set to true. As per requirements, the post-processor is responsible for calling the `MarketUpdateSuccessEventProducer` ProduceAsync method to produce messages of type `UpdateMarketSuccessEvent` to a partition on Kafka of the same name(using MarketId as partition key) 
+- Process is repeated for the same MarketId key within the partition (to be precise a consumer might read from other partitions as well, however a partition will never be shared with any other consumer/s)
+![Hosted Service](hosted.png)
+
+<a name="datastore"></a>
+## Datastore Document Entity Structure
+- Default database name: Markets
+- Default collection name:: Updates
+
+The following is an example of structure of the document entity that is persisted in the DB. 
+```json
+{
+    _id: '7dc4e6b8-aff6-4551-8d0a-5fbf033f2795', --Stringified CorrelationId
+    CreatedAt: ISODate('2020-12-02T15:04:23.958Z'),
+    MatchId: 5655,
+    MarketId: 10,
+    MarketType: 'Goal No Goal',
+    MarketState: 0,
+    Selections: [
+        {
+            Name: 'Over',
+            Price: 12.3
+        },
+        {
+            Name: ' 1',
+            Price: 7.74
+        }
+    ]
+}
+```
+
+Below are some examples queries to be used to search/filter and project the data:
+- `{ "MarketType": "Over & Under" }` Returns all documents matching the condition
+- `{ "Selections.Name": "Over" }` Returns all documents where the array of ‘Selections’ contains at least one entry matching the condition, irrespective of the index position
+- `{ "Selections.0.Name": "Over" }` Returns all documents where **only** the first item in the array of ‘Selections’ contains the matching the condition 
+- `{ $and: [ { "Selections.0.Name": "Over" }, { "Selections.Price": 12.3 } ] }` Returns all documents where **only** the first item in the array of ‘Selections’ contains the matching **AND** the condition 
+
+For more query examples, please refer to [MongoDB reference](https://docs.mongodb.com/manual/reference/operator/)
+
+<a name="container"></a>
+## Containerization and running the app
+
+The full implementation is container ready. In order to run the application, navigate to the docker folder and execute the following:
+
+```bash
+    docker-compose up -d 
+```
+
+The following command will pull/build/run the following containers:
+- **Confluent Control Center**. Essentially a control center (admin) for Kafka (think RabbitMq Admin) 
+- **Confluent Zookeeper**. Manages essential kafka cluster metadata
+- **Kafka**. Apache Kafka is an open-source stream-processing software platform developed by the Apache Software Foundation
+- **MongoDB**. MongoDB document databases provide high availability and easy scalability
+- **Mongo Express**. Web-based MongoDB admin interface, written with Node.js and express
+- **ExternalHost**. Our application service
+- **Nginx**. Nginx (pronounced "engine-x") is an open source reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, as well as a load balancer, HTTP cache, and a web server (origin server). nginx.conf is used to proxy
+
+### Relevant Exposed Endpoints
+- [ExternalHost via NGINX](http://localhost:4000/swagger/index.html) 
+- [Kafka Control Centre](http://localhost:9021/clusters)
+- [MongoDB Express](http://localhost:8081/)
