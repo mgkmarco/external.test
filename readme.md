@@ -61,7 +61,7 @@ Design the rest of the system to accomplish the requirement; you may use any tec
 
 ### Apache Kafka
 Kafka has been chosen as the primary message broker notably for three reasons:
-1. With the default scheme; any consumers within a consumer group will each be assigned a partition per topic. Thus, no competing consumers for a given partition. This essentially result in inherent message ordering. In the implementation, the partition key used is the MarketId
+1. With the default scheme; any consumers within a consumer group will each be assigned a partition per topic. Thus, no competing consumers for a given partition. This essentially results in inherent message ordering. In the implementation, the partition key used is the MarketId
 2. Kafka with replication and message persistence can offer out-of-the-box HA (high availability) and also the ability to persist and replay messages at a later stage 
 3. Kafka consumers are stateless. Offsets are kept on the broker, therefore in case of crashes, elected consumers for the partition can pick up from the last offset that has been committed
 
@@ -169,7 +169,7 @@ Important to note that for the `IRepository<MarketUpdateEntity>` implementation,
     ]
   }
 ```
-Same as for the database, multiple consumers and producers can be configured with each having their own set of settings. An important property to note is the EnableTopicCreation. On application startup, the implementation has bee executed in a way that if this setting is set to true, the application will under the hood attempt to create the topic, with the given settings for you. Thus this means that devops intervention is kept to the minimum.
+Same as for the database, multiple consumers and producers can be configured with each having their own set of settings. An important property to note is the EnableTopicCreation. On application startup, the implementation has been executed in a way that if this setting is set to true, the application will under the hood attempt to create the topic, with the given settings for you. Thus this means that devops intervention is kept to the minimum.
 In the Configurations sections (both Consumers and/or Producers) the following settings can be applied:
 [Kafka Configurations](https://kafka.apache.org/documentation/#configuration)
 
